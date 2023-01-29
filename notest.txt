@@ -1,0 +1,2 @@
+1) using the tutorial from https://fastapi.tiangolo.com/tutorial/security/
+2) Next will use https://codevoweb.com/crud-restful-api-server-with-python-fastapi-and-postgresql/
