@@ -1,3 +1,4 @@
 fastapi[all]
 uvicorn[standard]
 python-multipart
+neo4j==5.5.0

@@ -3,8 +3,17 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from enum import Enum
 from pydantic import BaseModel
 from typing import Union
+from app.utils.db import neo4j_driver
 
-app = FastAPI()
+
+app = FastAPI(
+    title="P-Cube API",
+    description="P-Cube API built for Neo4j with FastAPI",
+    version=0.1,
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 fake_users_db = {
@@ -24,8 +33,10 @@ fake_users_db = {
     },
 }
 
+
 def fake_hash_password(password: str):
     return "faked" + password
+
 
 class User(BaseModel):
     username: str
@@ -33,29 +44,35 @@ class User(BaseModel):
     full_name: Union[str, None] = None
     disabled: Union[str, None] = None
 
+
 class UserInDB(User):
     hashed_password: str
+
 
 def get_user(db, username: str):
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
 
+
 def fake_decode_token(token):
-    return User( username = token + "fakedecoded",
-                 email = "a@b.com",
-                 full_name = "John Doe",
-                 disabled = False)
+    return User(
+        username=token + "fakedecoded",
+        email="a@b.com",
+        full_name="John Doe",
+        disabled=False,
+    )
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = fake_decode_token(token)
     return user
 
 
-
 @app.get("/")
 async def root():
     return {"Message": "Hello World"}
+
 
 @app.get("users/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
@@ -71,3 +88,9 @@ async def read_item(token: str = Depends(oauth2_scheme)):
 async def read_item(item_id: int):
     return {"item_id": item_id}
 
+
+@app.get("/test")
+async def test_db():
+    with neo4j_driver.session() as session:
+        result = session.run("MATCH (n) RETURN n LIMIT 1")
+        print(result.single()[0])
