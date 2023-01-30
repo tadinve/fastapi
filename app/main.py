@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from enum import Enum
-from pydantic import BaseModel
 from typing import Union
-from app.utils.db import neo4j_driver
 
+from pydantic import BaseModel
+
+from app.projects import crud
+from fastapi import Depends, FastAPI
+from fastapi.security import OAuth2PasswordBearer
 
 app = FastAPI(
     title="P-Cube API",
@@ -14,6 +14,13 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+app.include_router(
+    crud.router,
+    prefix="/projects",
+    tags=["Project Node"],
+)
+
+####### old code #######
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 fake_users_db = {
@@ -87,10 +94,3 @@ async def read_item(token: str = Depends(oauth2_scheme)):
 @app.get("/items/{item_id}")
 async def read_item(item_id: int):
     return {"item_id": item_id}
-
-
-@app.get("/test")
-async def test_db():
-    with neo4j_driver.session() as session:
-        result = session.run("MATCH (n) RETURN n LIMIT 1")
-        print(result.single()[0])
