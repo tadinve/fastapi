@@ -139,3 +139,22 @@ async def get_project(node_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Error getting node: {e}",
         )
+
+
+# get a single projects
+@router.delete("/{node_id}")
+async def delete_project(node_id: int):
+    cypher = f"match (node:Project) where id(node)={node_id} DETACH DELETE node"
+
+    try:
+        with neo4j_driver.session() as session:
+            result = session.run(query=cypher)
+            node_data = result.data()
+
+        if not node_data:
+            return {"response": f"Node with ID: {node_id} was successfully deleted."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting node: {e}",
+        )

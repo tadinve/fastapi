@@ -16,7 +16,7 @@ app = FastAPI(
 
 app.include_router(
     crud.router,
-    prefix="/projects",
+    prefix="/api/projects",
     tags=["Project Node"],
 )
 
