@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from app.projects import crud
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = ['*']
 
 app = FastAPI(
     title="P-Cube API",
@@ -12,6 +15,14 @@ app = FastAPI(
     version=0.1,
     docs_url="/docs",
     redoc_url="/redoc",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(
